@@ -15,20 +15,23 @@ const app = express();
 // //Use CORS
 app.use(cors());
 //express is able to read postman
-app.use(express.urlencoded());
+// app.use(express.urlencoded());
 // //start the server
 app.get('/', (request, response) => {
 
   response.send('hi there');
 });
 
+let long = '';
+let lat = '';
 
-
-function Location(city, location) {
+function Location(location, city) {
   this.latitude = location.lat;
   this.longitude = location.lon;
   this.search_query = city;
   this.formatted_query = location.display_name;
+  long = this.longitude;
+  lat = this.latitude;
 }
 
 function Weather(obj, date) {
@@ -38,13 +41,25 @@ function Weather(obj, date) {
 }
 
 
+function Trails(obj) {
+  this.name = obj.name;
+  this.location = obj.location;
+  this.length = obj.length;
+  this.stars = obj.stars;
+  this.star_votes = obj.star_votes;
+  this.summary = obj.summary;
+  this.trail_url = obj.trail_url;
+  this.conditions = obj.conditions;
+  this.condition_date = obj.condition_date;
+  this.condition_time = obj.condition_time;
+
+}
 
 
-app.use('*', notFoundHandler);
 
 
 
-//get the information
+//get the city information
 app.get('/location', (request, response) => {
   let city = request.query.city;
   console.log(city);
@@ -68,22 +83,22 @@ app.get('/location', (request, response) => {
 
 });
 
-
+//get the weather information
 app.get('/weather', (request, response) => {
   let city = request.query.search_query;
   let key = process.env.WEATHERAPIKEY;
-  const URL = `https://api.weatherbit.io/v2.0/current?city=${city}&key=${key}`;
-
+  const URL = `https://api.weatherbit.io/v2.0/forecast/daily?city=${city}&key=${key}`;
+  console.log('url', URL);
   superagent.get(URL)
     .then(data => {
+      // console.log(data.body.data);
       let weatherArray = data.body.data.map(day => {
+        // console.log('DATA', data.body);
         let newDay = new Date(day.ts * 1000).toDateString();
         let weather = new Weather(day, newDay);
-        console.log(weather);
+        // console.log(weather);
         return weather;
       });
-
-      console.log(URL);
 
       response.status(200).json(weatherArray);
       response.send(weatherArray);
@@ -94,9 +109,36 @@ app.get('/weather', (request, response) => {
       response.status(500).send('Something went so horribly wrong');
     });
 
+});
+
+app.get('/trails', (request, response) => {
+  let location = request.query.search_query;
+  let key = process.env.TRAILAPIKEY;
+  const URL = `https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=${long}&maxDistance=10&key=${key}`;
+  console.log('url', URL);
+
+  superagent.get(URL)
+    .then(data => {
+      // console.log(data.body.trails);
+      let trailArray = data.body.trails.map(item => {
+        let trail = new Trails(item);
+        console.log(trail);
+        return trail;
+
+      });
+
+      response.status(200).json(trailArray);
+      response.send(trailArray);
+    })
+    .catch(error => {
+      console.log('ERROR', error);
+      response.status(500).send('Something went so Tragically wrong');
+    });
+
 
 });
 
+app.use('*', notFoundHandler);
 
 function notFoundHandler(request, response) {
   response.status(404).send('Page Not Found');
@@ -108,3 +150,5 @@ app.listen(PORT, () => {
 
 
 });
+
+
