@@ -15,82 +15,133 @@ const app = express();
 // //Use CORS
 app.use(cors());
 //express is able to read postman
-app.use(express.urlencoded());
+// app.use(express.urlencoded());
 // //start the server
-app.get('/', (req, res) => {
+app.get('/', (request, response) => {
 
-  res.send("hi there");
+  response.send('hi there');
 });
 
+let long = '';
+let lat = '';
 
-
-function Location(city, location) {
+function Location(location, city) {
   this.latitude = location.lat;
   this.longitude = location.lon;
   this.search_query = city;
   this.formatted_query = location.display_name;
+  long = this.longitude;
+  lat = this.latitude;
 }
 
-function Weather(forecast, time) {
-  this.forecast = forecast;
-  this.time = time;
-
+function Weather(obj, date) {
+  this.forecast = obj.weather.description;
+  this.time = date;
 
 }
 
-app.get('/location', getLocation);
-app.get('weather', getWeather);
-app.use('*', notFoundHandler);
 
-//get the information
-function getLocation(req, res) {
-  let city = req.query.city;
-  // console.log(city);
+function Trails(obj) {
+  this.name = obj.name;
+  this.location = obj.location;
+  this.length = obj.length;
+  this.stars = obj.stars;
+  this.star_votes = obj.star_votes;
+  this.summary = obj.summary;
+  this.trail_url = obj.trail_url;
+  this.conditions = obj.conditions;
+  this.condition_date = obj.condition_date;
+  this.condition_time = obj.condition_time;
+
+}
+
+
+
+
+
+//get the city information
+app.get('/location', (request, response) => {
+  let city = request.query.city;
+  console.log(city);
   let key = process.env.LOCATIONAPIKEY;
   const URL = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`;
   console.log(URL);
 
   superagent.get(URL)
     .then(data => {
-      let location = new Location(city, data.body[0]);
+      console.log(data.body[0]);
+      let location = new Location(data.body[0], city);
 
 
       //determining that all is working
-      res.status(200).json(location);
+      response.status(200).json(location);
     })
     .catch(error => {
       console.log('ERROR', error);
-      res.status(500).send('So Sorry, something went terribly wrong!');
+      response.status(500).send('So Sorry, something went terribly wrong!');
     });
 
-}
+});
+
+//get the weather information
+app.get('/weather', (request, response) => {
+  let city = request.query.search_query;
+  let key = process.env.WEATHERAPIKEY;
+  const URL = `https://api.weatherbit.io/v2.0/forecast/daily?city=${city}&key=${key}`;
+  console.log('url', URL);
+  superagent.get(URL)
+    .then(data => {
+      // console.log(data.body.data);
+      let weatherArray = data.body.data.map(day => {
+        // console.log('DATA', data.body);
+        let newDay = new Date(day.ts * 1000).toDateString();
+        let weather = new Weather(day, newDay);
+        // console.log(weather);
+        return weather;
+      });
+
+      response.status(200).json(weatherArray);
+      response.send(weatherArray);
+
+    })
+    .catch((error) => {
+      console.log('ERROR', error);
+      response.status(500).send('Something went so horribly wrong');
+    });
+
+});
+
+app.get('/trails', (request, response) => {
+  let location = request.query.search_query;
+  let key = process.env.TRAILAPIKEY;
+  const URL = `https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=${long}&maxDistance=10&key=${key}`;
+  console.log('url', URL);
+
+  superagent.get(URL)
+    .then(data => {
+      // console.log(data.body.trails);
+      let trailArray = data.body.trails.map(item => {
+        let trail = new Trails(item);
+        console.log(trail);
+        return trail;
+
+      });
+
+      response.status(200).json(trailArray);
+      response.send(trailArray);
+    })
+    .catch(error => {
+      console.log('ERROR', error);
+      response.status(500).send('Something went so Tragically wrong');
+    });
 
 
-function getWeather(req, res) {
-  let weatherArray = data.data.map(element => {
-    let forecast = element.weather.description;
-    let time = element.datetime;
+});
 
-    let key = process.env.WEATHERAPIKEY;
-    const URL = `https://api.weatherbit.io/v2.0/current?city=${city}&key=${key}`;
-    // console.log(URL);
+app.use('*', notFoundHandler);
 
-    res.status(200).json(location);
-
-  });
-}
-
-
-superagent.get(URL)
-  .then(data => {
-    let weather = new Weather(forecast, time);
-    //determining that all is working
-    res.status(200).json(weatherArray);
-
-  });
-
-function notFoundHandler(req, res) {
-  res.status(404).send('Page Not Found');
+function notFoundHandler(request, response) {
+  response.status(404).send('Page Not Found');
 
 }
 
@@ -99,3 +150,5 @@ app.listen(PORT, () => {
 
 
 });
+
+
