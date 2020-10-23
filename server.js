@@ -5,21 +5,29 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
+const pg =require('pg');
+
 
 // //Declare port
 const PORT = process.env.PORT || 3000;
 
-// //start Express
-const app = express();
+
 
 // //Use CORS
 app.use(cors());
+
+//create our postgresql client
+const client=newpg.Client(process.env.DATABASE_URL);
+
+// //start Express
+const app = express();
+
 //express is able to read postman
 app.use(express.urlencoded());
 // //start the server
 app.get('/', (req, res) => {
 
-  res.send("hi there");
+  res.send('hi there');
 });
 
 
