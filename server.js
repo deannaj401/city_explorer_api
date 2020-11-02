@@ -5,44 +5,49 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
-const pg = require('pg');
+// const pg = require('pg');
 
-//declare postgres port
-const client = new pg.Client(process.env.DATABASE_URL);
 
 // //Declare port
 const PORT = process.env.PORT || 3000;
 
-// //start Express
-const app = express();
+
 
 // //Use CORS
 app.use(cors());
 
+//create our postgresql client
+// const client = newpg.Client(process.env.DATABASE_URL);
+
+// //start Express
+const app = express();
+
+//express is able to read postman
+app.use(express.urlencoded());
 // //start the server
 app.get('/', (request, response) => {
 
   response.send('hi there');
 });
 
-app.get('/add', (request, response) => {
-  const latitude = request.query.lat;
-  const longitude = request.query.lon;
-  const search_query = request.query.city;
-  const formatted_query = request.query.display_name;
+// app.get('/add', (request, response) => {
+//   this.latitude = request.query.lat;
+//   this.longitude = request.query.lon;
+//   this.search_query = request.query.city;
+//   this.formatted_query = request.query.display_name;
 
-  const SQL = `INSERT INTO deannaj(latitude,longitude, search_query,formatted_query')VALUES($1, $2, $3, $4)RETURNING *`;
-  const safeValues = [latitude, longitude, search_query, formatted_query];
-  client.query(SQL, safeValues)
-    .then(results => {
-      response.status(200).json(results.rows);
-    })
-    .catch(error => {
-      console.log('ERROR', error);
-      response.status(500).send('Not Gonna Happen');
-    });
+//   // const SQL = `INSERT INTO deannaj(latitude,longitude, search_query,formatted_query')VALUES($1, $2, $3, $4)RETURNING *`;
+//   // const safeValues = [latitude, longitude, search_query, formatted_query];
+//   // client.query(SQL, safeValues)
+//   //   .then(results => {
+//   //     response.status(200).json(results.rows);
+//     })
+//     .catch(error => {
+//       console.log('ERROR', error);
+//       response.status(500).send('Not Gonna Happen');
+//     });
 
-});
+// });
 let long = '';
 let lat = '';
 
@@ -88,15 +93,15 @@ app.get('/location', (request, response) => {
   const URL = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`;
   console.log(URL);
 
-  const SQL = 'SELECT latitude longitude search_query formatted_query FROM deannaj';
-  client.query(SQL)
-    .then(results => {
-      response.status(200).json(results.rows);
-    })
-    .catch(error => {
-      console.log('Error', error);
-      response.status(500).send('NOPE');
-    });
+  // const SQL = 'SELECT latitude longitude search_query formatted_query FROM deannaj';
+  // client.query(SQL)
+  //   .then(results => {
+  //     response.status(200).json(results.rows);
+  //   })
+  //   .catch(error => {
+  //     console.log('Error', error);
+  //     response.status(500).send('NOPE');
+  //   });
 
 
   superagent.get(URL)
