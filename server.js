@@ -51,7 +51,7 @@ function getLocation(request, response) {
   }
   catch (error) {
     console.log('ERROR', error );
-    response.status(500).json("So Sorry, something went terribly wrong!");
+    response.status(500).json('So Sorry, something went terribly wrong!');
 
 
   }
