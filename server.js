@@ -5,63 +5,49 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
-<<<<<<< HEAD
-const pg =require('pg');
-
-=======
 const pg = require('pg');
 
-//declare postgres port
-const client = new pg.Client(process.env.DATABASE_URL);
->>>>>>> 01778945f0389ed41dea7ff8ecbf1afbfc3d07a3
 
 // //Declare port
 const PORT = process.env.PORT || 3000;
 
-
+// //start Express
+const app = express();
 
 // //Use CORS
 app.use(cors());
 
-<<<<<<< HEAD
 //create our postgresql client
-const client=newpg.Client(process.env.DATABASE_URL);
+const client = new pg.Client(process.env.DATABASE_URL);
 
-// //start Express
-const app = express();
+
 
 //express is able to read postman
 app.use(express.urlencoded());
-=======
->>>>>>> 01778945f0389ed41dea7ff8ecbf1afbfc3d07a3
 // //start the server
 app.get('/', (request, response) => {
 
-<<<<<<< HEAD
-  res.send('hi there');
-=======
   response.send('hi there');
->>>>>>> 01778945f0389ed41dea7ff8ecbf1afbfc3d07a3
 });
 
-app.get('/add', (request, response) => {
-  const latitude = request.query.lat;
-  const longitude = request.query.lon;
-  const search_query = request.query.city;
-  const formatted_query = request.query.display_name;
+// app.get('/add', (request, response) => {
+//   this.latitude = request.query.lat;
+//   this.longitude = request.query.lon;
+//   this.search_query = request.query.city;
+//   this.formatted_query = request.query.display_name;
 
-  const SQL = `INSERT INTO deannaj(latitude,longitude, search_query,formatted_query')VALUES($1, $2, $3, $4)RETURNING *`;
-  const safeValues = [latitude, longitude, search_query, formatted_query];
-  client.query(SQL, safeValues)
-    .then(results => {
-      response.status(200).json(results.rows);
-    })
-    .catch(error => {
-      console.log('ERROR', error);
-      response.status(500).send('Not Gonna Happen');
-    });
+//   // const SQL = `INSERT INTO deannaj(latitude,longitude, search_query,formatted_query')VALUES($1, $2, $3, $4)RETURNING *`;
+//   // const safeValues = [latitude, longitude, search_query, formatted_query];
+//   // client.query(SQL, safeValues)
+//   //   .then(results => {
+//   //     response.status(200).json(results.rows);
+//     })
+//     .catch(error => {
+//       console.log('ERROR', error);
+//       response.status(500).send('Not Gonna Happen');
+//     });
 
-});
+// });
 let long = '';
 let lat = '';
 
@@ -95,32 +81,69 @@ function Trails(obj) {
 
 }
 
+// function Movies(obj) {
+//   this.title = obj.title;
+//   this.overview = obj.overview;
+//   this.average_votes = obj.average_votes;
+//   this.image_url = obj.image_url;
+//   this.popularity = obj.popularity;
+//   this.released_on = obj.released_on;
+// }
 
 
+/*
+Create (INSERT) // POST
+Read (SELECT) // GET
+Update (Update) // PUT
+Delete/Destroy (Delete) // DELETE
 
+Persons
+First Name | Last Name | Bday | Height | Weight
+
+SELECT First Name Last Name
+FROM Persons
+WHERE FirstName.Contains("a")
+Order By Desc (how the data is received back)
+ */
+/*
+SELECT ("Projection", what it is that you want from the db...specifically the fields)
+FROM (Data source => Table of interest)
+WHERE (Filter)
+*/
 
 //get the city information
 app.get('/location', (request, response) => {
   let city = request.query.city;
-  console.log(city);
+  // console.log(city);
   let key = process.env.LOCATIONAPIKEY;
   const URL = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`;
-  console.log(URL);
+  //console.log(URL);
 
-  const SQL = 'SELECT latitude longitude search_query formatted_query FROM deannaj';
-  client.query(SQL)
+  const SQL = 'SELECT * FROM location WHERE search_query = $1';
+  const values = [city];
+  var data = client.query(SQL, values)
     .then(results => {
-      response.status(200).json(results.rows);
+      if (results.rowCount) {
+        return 'YEEHAW!';
+
+        // }      response.status(200).json(results.rows);
+      } else {
+        return 'NOPE NOPE NOPE';
+      }
     })
     .catch(error => {
       console.log('Error', error);
       response.status(500).send('NOPE');
     });
 
+  console.log(data);
 
+
+  // Check and see if location exists in the database
+  //Making API call to get location data
   superagent.get(URL)
     .then(data => {
-      console.log(data.body[0]);
+      //  console.log(data.body[0]);
       let location = new Location(data.body[0], city);
 
 
@@ -139,7 +162,7 @@ app.get('/weather', (request, response) => {
   let city = request.query.search_query;
   let key = process.env.WEATHERAPIKEY;
   const URL = `https://api.weatherbit.io/v2.0/forecast/daily?city=${city}&key=${key}`;
-  console.log('url', URL);
+  // console.log('url', URL);
   superagent.get(URL)
     .then(data => {
       // console.log(data.body.data);
@@ -163,17 +186,17 @@ app.get('/weather', (request, response) => {
 });
 
 app.get('/trails', (request, response) => {
-  let location = request.query.search_query;
+  // let location = request.query.search_query;
   let key = process.env.TRAILAPIKEY;
   const URL = `https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=${long}&maxDistance=10&key=${key}`;
-  console.log('url', URL);
+  //  console.log('url', URL);
 
   superagent.get(URL)
     .then(data => {
       // console.log(data.body.trails);
       let trailArray = data.body.trails.map(item => {
         let trail = new Trails(item);
-        console.log(trail);
+        //    console.log(trail);
         return trail;
 
       });
@@ -188,6 +211,33 @@ app.get('/trails', (request, response) => {
 
 
 });
+
+// app.get('/movies', (request, response) => {
+//   // let location = request.query.search_query;
+//   let key = process.env.MOVIEAPIKEY;
+//   const URL = `https://api.themoviedb.org/3/movie/${key}`;
+//   //console.log('url', URL);
+
+//   superagent.get(URL)
+//     .then(data => {
+//       // console.log(data.body.trails);
+//       let movieArray = data.body.movie.map(item => {
+//         let movie = new Movies(item);
+//        // console.log(movie);
+//         return movie;
+
+//       });
+
+//       response.status(200).json(movieArray);
+//       response.send(movieArray);
+//     })
+//     .catch(error => {
+//       console.log('ERROR', error);
+//       response.status(500).send('Something went so Tragically wrong');
+//     });
+
+
+// });
 
 app.use('*', notFoundHandler);
 
