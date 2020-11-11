@@ -81,35 +81,6 @@ function Trails(obj) {
 
 }
 
-// function Movies(obj) {
-//   this.title = obj.title;
-//   this.overview = obj.overview;
-//   this.average_votes = obj.average_votes;
-//   this.image_url = obj.image_url;
-//   this.popularity = obj.popularity;
-//   this.released_on = obj.released_on;
-// }
-
-
-/*
-Create (INSERT) // POST
-Read (SELECT) // GET
-Update (Update) // PUT
-Delete/Destroy (Delete) // DELETE
-
-Persons
-First Name | Last Name | Bday | Height | Weight
-
-SELECT First Name Last Name
-FROM Persons
-WHERE FirstName.Contains("a")
-Order By Desc (how the data is received back)
- */
-/*
-SELECT ("Projection", what it is that you want from the db...specifically the fields)
-FROM (Data source => Table of interest)
-WHERE (Filter)
-*/
 
 //get the city information
 app.get('/location', (request, response) => {
@@ -251,5 +222,3 @@ app.listen(PORT, () => {
 
 
 });
-
-
