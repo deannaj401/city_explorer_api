@@ -5,43 +5,30 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
-<<<<<<< HEAD
-const pg =require('pg');
 
-=======
-const pg = require('pg');
+const pg =require('pg');
 
 //declare postgres port
 const client = new pg.Client(process.env.DATABASE_URL);
->>>>>>> 01778945f0389ed41dea7ff8ecbf1afbfc3d07a3
 
 // //Declare port
 const PORT = process.env.PORT || 3000;
 
-
-
 // //Use CORS
 app.use(cors());
 
-<<<<<<< HEAD
 //create our postgresql client
-const client=newpg.Client(process.env.DATABASE_URL);
 
 // //start Express
 const app = express();
 
 //express is able to read postman
 app.use(express.urlencoded());
-=======
->>>>>>> 01778945f0389ed41dea7ff8ecbf1afbfc3d07a3
 // //start the server
 app.get('/', (request, response) => {
 
-<<<<<<< HEAD
   res.send('hi there');
-=======
   response.send('hi there');
->>>>>>> 01778945f0389ed41dea7ff8ecbf1afbfc3d07a3
 });
 
 app.get('/add', (request, response) => {
@@ -95,9 +82,27 @@ function Trails(obj) {
 
 }
 
+app.get('/location', getLocation);
+app.get('/weather', getWeather);
+
+//get the information
+function getLocation(request, response) {
+  try {
+    let data = require('./data/location.json');
+    let city = request.query.city;
+    console.log(city);
+    let location = new Location(data, city);
+    console.log(location);
+    //determining that all is working
+    response.status(200).json(location);
+  }
+  catch (error) {
+    console.log('ERROR', error );
+    response.status(500).json('So Sorry, something went terribly wrong!');
 
 
-
+  }
+}
 
 //get the city information
 app.get('/location', (request, response) => {
